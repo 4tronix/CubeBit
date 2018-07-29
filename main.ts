@@ -65,25 +65,63 @@ namespace cubebit {
 
     function pixelMap(x: number, y: number, z: number): number
     {
+        if (cubeSide == 8)
+            return pMap8(x, y, z);
+        else
+            return pMap(x, y, z, cubeSide);
+    }
+
+    //pMap8 is mapping function for 8x8 built out of 4x4 slices. 0,0,0 is not ID=0, it is in fact 268
+    function pMap8(x: number, y: number, z: number): number
+    {
+        if (x<4 && y<4)  // column 0 (front left)
+        {
+            return 256 + pMap(3-x, 3-y, z, 4);
+        }
+        else if (x>=4 && y<4)  // column 1 (front right)
+        {
+            if ((z%2) == 0)
+                return 255 - pMap(y, x-4, z, 4);
+            else
+                return 255 - pMap(3-y, 7-x, z, 4);
+        }
+        else if (x<4 && y>=4)  // column 2 (back left)
+        {
+            if ((z%2) == 0)
+                return 511 - pMap(7-y, 3-x, z, 4);
+            else
+                return 511 - pMap(y-4, x, z, 4);
+        }
+        else  // column 3 (back right)
+        {
+            return pMap(x-4, y-4, z, 4);
+        }
+    }
+
+    function pMap(x: number, y: number, z: number, side: number): number
+    {
         let q=0;
-        if (x<cubeSide && y<cubeSide && z<cubeHeight && x>=0 && y>=0 && z>=0)
+        if (x<side && y<side && z<cubeHeight && x>=0 && y>=0 && z>=0)
         {
             if ((z%2) == 0)
             {
                 if ((y%2) == 0)
-                    q = y * cubeSide + x;
+                    q = y * side + x;
                 else
-                    q = y * cubeSide + cubeSide - 1 - x;
+                    q = y * side + side - 1 - x;
             }
             else
             {
+                if ((side%2) == 0)
+                    y = side - y - 1;
                 if ((x%2) == 0)
-                    q = cubeSide * (cubeSide - x) - 1 - y;
+                    q = side * (side - x) - 1 - y;
                 else
-                    q = (cubeSide - 1 - x) * cubeSide + y;
+                    q = (side - 1 - x) * side + y;
             }
+            return z*side*side + q;
         }
-        return z*cubeSide2 + q;
+        return cubeSide3;    // extra non-existent pixel for out of bounds
     }
 
     /**
