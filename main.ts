@@ -65,7 +65,7 @@ namespace cubebit {
 
     function pixelMap(x: number, y: number, z: number): number
     {
-        if (cubeSide == 8)
+        if (cubeSide == 9)	// need to change to separate flag for cubes built out of smaller slices
             return pMap8(x, y, z);
         else
             return pMap(x, y, z, cubeSide);
