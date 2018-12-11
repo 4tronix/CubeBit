@@ -160,7 +160,7 @@ namespace cubebit {
       *
       * @param rgb RGB colour of the pixel
       */
-    //% blockId="cubebit_set_color" block="set all pixels to %rgb=cb_colors"
+    //% blockId="cubebit_set_color" block="set all pixels to %rgb=cb_colours"
     //% weight=90
     export function setColor(rgb: number): void
     {
@@ -173,7 +173,7 @@ namespace cubebit {
      * @param ID location of the pixel in the cube from 0
      * @param rgb RGB color of the LED
      */
-    //% blockId="cubebit_set_pixel_color" block="set pixel color at %ID|to %rgb=cb_colors"
+    //% blockId="cubebit_set_pixel_color" block="set pixel color at %ID|to %rgb=cb_colours"
     //% weight=85
     export function setPixelColor(ID: number, rgb: number): void
     {
@@ -197,7 +197,7 @@ namespace cubebit {
       * @param axis axis (xy,xz,yz) of the plane
       * @param rgb RGB colour of the pixel
       */
-    //% blockId="cubebit_set_plane" block="set plane %plane| on axis %axis=CBAxis| to %rgb=cb_colors"
+    //% blockId="cubebit_set_plane" block="set plane %plane| on axis %axis=CBAxis| to %rgb=cb_colours"
     //% weight=75
     export function setPlane(plane: number, axis: CBAxis, rgb: number): void
     {
