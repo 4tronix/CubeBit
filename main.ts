@@ -155,7 +155,7 @@ namespace cubebit {
      * @param pin Micro:Bit pin to connect to Cube:Bit
      * @param side number of pixels on each side. eg: 3, 4, 5, 8
      */
-    //% blockId="cubebit_create" block="create 05 Cube:Bit on %pin| with side %side"
+    //% blockId="cubebit_create" block="create Cube:Bit on %pin| with side %side"
     //% weight=100
     //% side.min=3 side.max=8
     export function create(pin: DigitalPin, side: number): void
