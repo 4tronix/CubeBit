@@ -13,7 +13,7 @@ Then set the brightness to be used from 0 to 255. If this block is not used, the
 set cube:bit brightness to <0..255>
 ```
 
-##Using Cube:Bit Pixels
+## Using Cube:Bit Pixels
 Each pixel can be addressed by using the pixel ID which is a number from 0 to the number of pixels in the cube minus one. eg. a 3x3x3 cube has 27 pixels so the ID can be 0 to 26, 4x4x4 has 64 (ID 0 to 63) and 5x5x5 has 125 (ID 0 to 124)
 ```blocks
 set pixel color at ID to <colour>
@@ -25,17 +25,17 @@ convert from red, green, blue
 
 If you want to specify the x,y,z position of the pixel then use the mapping block to create the pixel ID
 ```blocks
-map from x y x
+map from x y z
 ```
 
-Whenever changing the colour of pixels or clearing them, or rotating them, you will need to display the result afterwards. Use the show changes block for this
+If you have set the Manual update mode, then whenever changing the colour of pixels or clearing them, or rotating them, you will need to display the result afterwards. Use the show changes block for this. The default update mode is automatic so any changes to the LED values will immediately appear on the LEDs
 ```blocks
 show Cube:Bit changes
 ```
 
 You can also set a whole plane of pixels to the same colour. eg. set the top slice to blue, or the left side to green. Use the set plane block:
 ```blocks
-set plan <number> on axis <xy, xz, yz> to <colour>
+set plane <number> on axis <xy, xz, yz> to <colour>
 ```
 
 ## Supported targets
@@ -44,4 +44,4 @@ set plan <number> on axis <xy, xz, yz> to <colour>
 
 ## License
 
-Apache 2.0
+MIT

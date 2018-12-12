@@ -1,8 +1,8 @@
 {
     "name": "cubebit",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "description": "A Cube:Bit package for pxt-microbit",
-    "license": "Apache",
+    "license": "MIT",
     "dependencies": {
         "core": "*",
         "neopixel": "github:microsoft/pxt-neopixel#v0.6.10"
