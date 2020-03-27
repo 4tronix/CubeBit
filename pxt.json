@@ -1,11 +1,11 @@
 {
-    "name": "cubebit",
-    "version": "1.0.2",
-    "description": "A Cube:Bit package for pxt-microbit",
+    "name": "CubeBit",
+    "version": "1.1.0",
+    "description": "Microsoft MakeCode package for 4tronix CubeBit",
     "license": "MIT",
     "dependencies": {
         "core": "*",
-        "neopixel": "github:microsoft/pxt-neopixel#v0.6.10"
+        "fireled": "github:4tronix/FireLedsBase#0.1.4"
     },
     "files": [
         "README.md",

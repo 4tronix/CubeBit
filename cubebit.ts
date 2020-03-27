@@ -56,7 +56,8 @@ enum CBColors
 //% weight=10 color=#e7660b icon="\uf247"
 namespace cubebit {
 
-    let nCube: neopixel.Strip;
+    let nCube: fireled.Band;
+    let btEnabled = false;
     let cubeHeight: number;
     let cubeSide: number;
     let cubeSide2: number;
@@ -64,6 +65,11 @@ namespace cubebit {
     let _updateMode = CBMode.Auto;
 
 // Helper functions
+
+    function clamp(value: number, min: number, max: number): number
+    {
+        return Math.max(Math.min(max, value), min);
+    }
 
     function pixelMap(x: number, y: number, z: number): number
     {
@@ -126,7 +132,8 @@ namespace cubebit {
         return cubeSide3;    // extra non-existent pixel for out of bounds
     }
 
-    function neo(pin: DigitalPin, side: number): neopixel.Strip
+    // create a FireLed band if not got one already. Default to brightness 40
+    function fire(pin: DigitalPin, side: number): fireled.Band
     {
         if (!nCube)
         {
@@ -135,17 +142,17 @@ namespace cubebit {
             cubeSide = side;
             cubeSide2 = side * side;
             cubeSide3 = side * side * cubeHeight;
-            nCube = neopixel.create(pin, cubeSide3, NeoPixelMode.RGB);
+            nCube = fireled.newBand(pin, cubeSide3);
             nCube.setBrightness(40);
         }
         return nCube;
     }
 
-    // update LEDs if _updateMode set to Auto
-    function updateLEDs(): void
+    // update FireLeds if updateMode set to Auto  
+    function updateLEDs()
     {
         if (_updateMode == CBMode.Auto)
-            neo(DigitalPin.P0,3).show();
+            ledShow();
     }
 
 // Main exported functions
@@ -155,36 +162,48 @@ namespace cubebit {
      * @param pin Micro:Bit pin to connect to Cube:Bit
      * @param side number of pixels on each side. eg: 3, 4, 5, 8
      */
-    //% blockId="cubebit_create" block="create Cube:Bit on %pin| with side %side"
+    //% blockId="cbCreate" block="create Cube:Bit on%pin|with side%side"
     //% weight=100
     //% side.min=3 side.max=8
     export function create(pin: DigitalPin, side: number): void
     {
-        neo(pin, side);
+        side = clamp(side, 3, 8);
+        fire(pin, side);
     }
 
     /**
-      * Sets all pixels to a given colour
-      * @param rgb RGB colour of the pixel
+      * Sets all pixels to a given color
+      * @param rgb RGB color of the LED
       */
-    //% blockId="cubebit_set_color" block="set all pixels to %rgb=cb_colours"
+    //% blockId="cbSetLedColor" block="set all pixels to%rgb=FireColours"
     //% weight=90
-    export function setColor(rgb: number): void
+    export function setLedColor(rgb: number)
     {
-        neo(DigitalPin.P0,3).showColor(rgb);
+        fire(DigitalPin.P0,3).setBand(rgb);
+        updateLEDs();
+    }
+
+    /**
+      * Clear all pixels.
+      */
+    //% blockId="cbLedClear" block="clear all pixels"
+    //% weight=80
+    export function ledClear()
+    {
+        fire(DigitalPin.P0,3).clearBand();
         updateLEDs();
     }
 
     /**
      * Set a pixel to a given colour.
-     * @param ID location of the pixel in the cube from 0
+     * @param ledId location of the pixel in the cube from 0
      * @param rgb RGB color of the LED
      */
-    //% blockId="cubebit_set_pixel_color" block="set pixel color at %ID|to %rgb=cb_colours"
-    //% weight=85
-    export function setPixelColor(ID: number, rgb: number): void
+    //% blockId="SetPixelColor" block="set pixel at%ledId|to%rgb=FireColours"
+    //% weight=70
+    export function setPixelColor(ledId: number, rgb: number)
     {
-        neo(DigitalPin.P0,3).setPixelColor(ID, rgb);
+        fire(DigitalPin.P0,3).setPixel(ledId, rgb);
         updateLEDs();
     }
 
@@ -194,27 +213,27 @@ namespace cubebit {
       * @param axis axis (xy,xz,yz) of the plane
       * @param rgb RGB colour of the pixel
       */
-    //% blockId="cubebit_set_plane" block="set plane %plane| on axis %axis=CBAxis| to %rgb=cb_colours"
-    //% weight=80
+    //% blockId="cbSetPlane" block="set plane%plane|on axis%axis=CBAxis|to %rgb=FireColours"
+    //% weight=60
     export function setPlane(plane: number, axis: CBAxis, rgb: number): void
     {
         if (axis == CBAxis.YZ)
         {
             for (let y=0; y<cubeSide; y++)
                 for (let z=0; z<cubeHeight; z++)
-                    nCube.setPixelColor(pixelMap(plane,y,z), rgb);
+                    nCube.setPixel(pixelMap(plane,y,z), rgb);
         }
         else if (axis == CBAxis.XZ)
         {
             for (let x=0; x<cubeSide; x++)
                 for (let z=0; z<cubeHeight; z++)
-                    nCube.setPixelColor(pixelMap(x,plane,z), rgb);
+                    nCube.setPixel(pixelMap(x,plane,z), rgb);
         }
         else if (axis == CBAxis.XY)
         {
             for (let x=0; x<cubeSide; x++)
                 for (let y=0; y<cubeSide; y++)
-                    nCube.setPixelColor(pixelMap(x,y,plane), rgb);
+                    nCube.setPixel(pixelMap(x,y,plane), rgb);
         }
         updateLEDs();
     }
@@ -225,8 +244,8 @@ namespace cubebit {
      * @param y position from front to back (y dimension)
      * @param z position from bottom to top (z dimension)
      */
-    //% blockId="cubebit_map_pixel" block="map ID from x %x|y %y|z %z"
-    //% weight=75
+    //% blockId="cbMapPixel" block="map ID from x%x|y%y|z%z"
+    //% weight=50
     export function mapPixel(x: number, y: number, z: number): number
     {
         return pixelMap(x,y,z);
@@ -235,33 +254,47 @@ namespace cubebit {
     /**
       * Shows a rainbow pattern on all pixels
       */
-    //% blockId="cubebit_rainbow" block="set Cube:Bit rainbow"
-    //% weight=70
-    export function neoRainbow(): void
+    //% blockId="cbLedRainbow" block="set Cube:Bit rainbow"
+    //% weight=40
+    export function ledRainbow()
     {
-        neo(DigitalPin.P0,3).showRainbow(1, 360);
-        updateLEDs();
+        fire(DigitalPin.P0,3).setRainbow();
+        updateLEDs()
     }
 
     /**
      * Rotate LEDs forward.
      */
-    //% blockId="cubebit_rotate" block="rotate pixels"
-    //% weight=65
-    export function neoRotate(): void
+    //% blockId="cbLedRotate" block="rotate pixels"
+    //% weight=30
+    export function ledRotate()
     {
-        neo(DigitalPin.P0,3).rotate(1);
-        updateLEDs();
+        fire(DigitalPin.P0,3).rotateBand();
+        updateLEDs()
     }
 
 // Advanced blocks
 
     /**
+     * Set the brightness of the cube.
+     * @param brightness a measure of LED brightness in 0-255. eg: 40
+     */
+    //% blockId="cbLedBrightness" block="set Cube:Bit brightness%brightness"
+    //% brightness.min=0 brightness.max=255
+    //% weight=100
+    //% advanced=true
+    export function ledBrightness(brightness: number): void
+    {
+        fire(DigitalPin.P0,3).setBrightness(brightness);
+        updateLEDs();
+    }
+
+    /**
       * Set LED update mode (Manual or Automatic)
       * @param updateMode setting automatic will show LED changes automatically
       */
-    //% blockId="cubebit_set_updateMode" block="set %updateMode|update mode"
-    //% weight=100
+    //% blockId="cbSetUpdateMode" block="set%updateMode|update mode"
+    //% weight=90
     //% advanced=true
     export function setUpdateMode(updateMode: CBMode): void
     {
@@ -271,75 +304,56 @@ namespace cubebit {
     /**
       * Show all changes
       */
-    //% blockId="cubebit_show" block="show Cube:Bit changes"
-    //% weight=95
+    //% blockId="cbLedShow" block="show Cube:Bit changes"
+    //% weight=80
     //% advanced=true
-    export function neoShow(): void
+    export function ledShow(): void
     {
-        neo(DigitalPin.P0,3).show();
-    }
-
-    /**
-     * Set the brightness of the cube.
-     * @param brightness a measure of LED brightness in 0-255. eg: 40
-     */
-    //% blockId="cubebit_brightness" block="set Cube:Bit brightness %brightness"
-    //% brightness.min=0 brightness.max=255
-    //% weight=90
-    //%advanced=true
-    export function neoBrightness(brightness: number): void
-    {
-        neo(DigitalPin.P0,3).setBrightness(brightness);
-        updateLEDs();
-    }
-
-    /**
-      * Clear leds.
-      */
-    //% blockId="cubebit_clear" block="clear all pixels"
-    //% weight=85
-    //% advanced=true
-    export function neoClear(): void
-    {
-        neo(DigitalPin.P0,3).clear();
-        updateLEDs();
+        if (! btEnabled)
+            fire(DigitalPin.P0,3).updateBand();
     }
 
     /**
      * Shift LEDs forward and clear with zeros.
      */
-    //% blockId="cubebit_shift" block="shift pixels"
-    //% weight=80
+    //% blockId="cbLedShift" block="shift pixels"
+    //% weight=70
     //% advanced=true
-    export function neoShift(): void
+    export function ledShift(): void
     {
-        neo(DigitalPin.P0,3).shift(1);
+        fire(DigitalPin.P0,3).shiftBand();
         updateLEDs();
     }
 
     /**
       * Get numeric value of colour
-      *
-      * @param color Standard RGB Led Colours
+      * @param colour Standard RGB Led Colours eg: #ff0000
       */
-    //% blockId="cb_colours" block=%color
-    //% weight=75
-    //%advanced=true
-    export function CBColours(color: CBColors): number
+    //% blockId="FireColours" block=%colour
+    //% subcategory=Generic
+    //% weight=60
+    //% advanced=true
+    //% shim=TD_ID colorSecondary="#e7660b"
+    //% colour.fieldEditor="colornumber"
+    //% colour.fieldOptions.decompileLiterals=true
+    //% colour.defl='#ff0000'
+    //% colour.fieldOptions.colours='["#FF0000","#659900","#18E600","#80FF00","#00FF00","#FF8000","#D82600","#B24C00","#00FFC0","#00FF80","#FFC000","#FF0080","#FF00FF","#B09EFF","#00FFFF","#FFFF00","#8000FF","#0080FF","#0000FF","#FFFFFF","#FF8080","#80FF80","#40C0FF","#999999","#000000"]'
+    //% colour.fieldOptions.columns=5
+    //% colour.fieldOptions.className='rgbColorPicker'
+    export function fireColours(colour: number): number
     {
-        return color;
+        return colour;
     }
 
     /**
-     * Convert from RGB values to colour number
-     *
-     * @param red Red value of the LED 0:255
-     * @param green Green value of the LED 0:255
-     * @param blue Blue value of the LED 0:255
+      * Convert from RGB values to colour number
+      * @param red Red value of the LED (0 to 255)
+      * @param green Green value of the LED (0 to 255)
+      * @param blue Blue value of the LED (0 to 255)
      */
-    //% blockId="cubebit_convertRGB" block="convert from red %red| green %green| blue %bblue"
-    //% weight=70
-    //%advanced=true
+    //% blockId="cbConvertRGB" block="convert from red%red|green%green|blue%bblue"
+    //% weight=50
+    //% advanced=true
     export function convertRGB(r: number, g: number, b: number): number
     {
         return ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
@@ -350,7 +364,7 @@ namespace cubebit {
       * define the height BEFORE creating the cube
       * @param height number of slices in the tower. eg: 4
       */
-    //% blockId="cubebit_set_height" block="set height of tower to %height"
+    //% blockId="cbSetHeight" block="set height of tower to%height"
     //% weight=65
     //% advanced=true
     export function setHeight(height: number): void
