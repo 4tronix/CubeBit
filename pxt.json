@@ -1,6 +1,6 @@
 {
     "name": "cubebit",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "A Cube:Bit package for pxt-microbit",
     "license": "MIT",
     "dependencies": {
@@ -9,7 +9,7 @@
     },
     "files": [
         "README.md",
-        "main.ts"
+        "cubebit.ts"
     ],
     "testFiles": [
         "tests.ts"
