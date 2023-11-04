@@ -1,6 +1,6 @@
 {
     "name": "CubeBit",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "Microsoft MakeCode package for 4tronix CubeBit",
     "license": "MIT",
     "dependencies": {
